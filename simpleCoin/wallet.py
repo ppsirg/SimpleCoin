@@ -23,6 +23,8 @@ import time
 import base64
 import ecdsa
 
+from infrastructure import base_url
+
 
 def wallet():
     response = None
@@ -67,7 +69,7 @@ def send_transaction(addr_from, private_key, addr_to, amount):
 
     if len(private_key) == 64:
         signature, message = sign_ECDSA_msg(private_key)
-        url = 'http://localhost:5000/txion'
+        url = base_url + '/txion'
         payload = {"from": addr_from,
                    "to": addr_to,
                    "amount": amount,
@@ -85,7 +87,7 @@ def check_transactions():
     """Retrieve the entire blockchain. With this you can check your
     wallets balance. If the blockchain is to long, it may take some time to load.
     """
-    res = requests.get('http://localhost:5000/blocks')
+    res = requests.get(base_url + '/blocks')
     print(res.text)
 
 def allowed_characters(key):

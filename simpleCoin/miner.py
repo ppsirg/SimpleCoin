@@ -151,6 +151,8 @@ def find_new_chains():
         # Get their chains using a GET request
         block = requests.get(node_url + "/blocks").content
         # Convert the JSON object to a Python dictionary
+        block = block.decode('utf8')
+        print(block)
         block = json.loads(block)
         # Verify other node block is correct
         validated = validate_blockchain(block)
@@ -240,6 +242,10 @@ def transaction():
         print('pending response is {}'.format(pending))
         return pending
 
+@node.route('/', methods=['GET'])
+def im_working():
+    return 'hello to SimpleCoin for flisol cali 2018'
+
 
 def validate_signature(public_key, signature, message):
     """Verifies if the signature is correct. This is used to prove
@@ -264,6 +270,16 @@ def welcome_msg():
         Make sure you are using the latest version or you may end in
         a parallel chain.\n\n\n""")
 
+def initial():
+    welcome_msg()
+    # Start mining
+    a, b = Pipe()
+    print(BLOCKCHAIN, NODE_PENDING_TRANSACTIONS)
+    p1 = Process(target=mine, args=(a, BLOCKCHAIN, NODE_PENDING_TRANSACTIONS))
+    p1.start()
+    # Start server to receive transactions
+    # p2 = Process(target=node.run(), args=b)
+    # p2.start()
 
 if __name__ == '__main__':
     welcome_msg()
