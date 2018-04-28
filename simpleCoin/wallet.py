@@ -88,6 +88,12 @@ def check_transactions():
     res = requests.get('http://localhost:5000/blocks')
     print(res.text)
 
+def allowed_characters(key):
+    banned = [b'+', b'/']
+    for i in banned:
+        if i in key:
+            return False
+    return True
 
 def generate_ECDSA_keys():
     """This function takes care of creating your private and public (your address) keys.
@@ -97,13 +103,16 @@ def generate_ECDSA_keys():
     private_key: str
     public_ley: base64 (to make it shorter)
     """
-    sk = ecdsa.SigningKey.generate(curve=ecdsa.SECP256k1) #this is your sign (private key)
-    private_key = sk.to_string().hex() #convert your private key to hex
-    vk = sk.get_verifying_key() #this is your verification key (public key)
-    public_key = vk.to_string().hex()
-    #we are going to encode the public key to make it shorter
-    public_key = base64.b64encode(bytes.fromhex(public_key))
-    
+    while True:
+        sk = ecdsa.SigningKey.generate(curve=ecdsa.SECP256k1) #this is your sign (private key)
+        private_key = sk.to_string().hex() #convert your private key to hex
+        vk = sk.get_verifying_key() #this is your verification key (public key)
+        public_key = vk.to_string().hex()
+        #we are going to encode the public key to make it shorter
+        public_key = base64.b64encode(bytes.fromhex(public_key))
+        if allowed_characters(public_key):
+            break
+
     filename = input("Write the name of your new address: ") + ".txt"
     with open(filename, "w") as f:
         f.write("Private key: {0}\nWallet address / Public key: {1}".format(private_key, public_key.decode()))

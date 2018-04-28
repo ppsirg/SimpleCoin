@@ -109,7 +109,12 @@ def mine(a, blockchain, node_pending_transactions):
             # ...we reward the miner by adding a transaction
             # First we load all pending transactions sent to the node server
             NODE_PENDING_TRANSACTIONS = requests.get(MINER_NODE_URL + "/txion?update=" + MINER_ADDRESS).content
-            NODE_PENDING_TRANSACTIONS = json.loads(NODE_PENDING_TRANSACTIONS)
+            try:
+                NODE_PENDING_TRANSACTIONS = json.loads(NODE_PENDING_TRANSACTIONS)
+                print('successfully load pending transactions {}'.format(NODE_PENDING_TRANSACTIONS))
+            except Exception as e:
+                print('can load NODE_PENDING_TRANSACTIONS because of {}'.format(e))
+                NODE_PENDING_TRANSACTIONS = []
             # Then we add the mining reward
             NODE_PENDING_TRANSACTIONS.append({
                 "from": "network",
@@ -213,6 +218,7 @@ def transaction():
     if request.method == 'POST':
         # On each new POST request, we extract the transaction data
         new_txion = request.get_json()
+        print('this is the thing ', new_txion)
         # Then we add the transaction to our list
         if validate_signature(new_txion['from'], new_txion['signature'], new_txion['message']):
             NODE_PENDING_TRANSACTIONS.append(new_txion)
@@ -231,6 +237,7 @@ def transaction():
         pending = json.dumps(NODE_PENDING_TRANSACTIONS)
         # Empty transaction list
         NODE_PENDING_TRANSACTIONS[:] = []
+        print('pending response is {}'.format(pending))
         return pending
 
 
@@ -262,6 +269,7 @@ if __name__ == '__main__':
     welcome_msg()
     # Start mining
     a, b = Pipe()
+    print(BLOCKCHAIN, NODE_PENDING_TRANSACTIONS)
     p1 = Process(target=mine, args=(a, BLOCKCHAIN, NODE_PENDING_TRANSACTIONS))
     p1.start()
     # Start server to receive transactions
